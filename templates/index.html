@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Image App wannabe</title>
+</head>
+<body>
+    <h1>Welcome to Secure Image App</h1>
+    {% if current_user.is_authenticated %}
+        <p>Hello, {{ current_user.username }}! <a href="{{ url_for('logout') }}">Logout</a></p>
+        <a href="{{ url_for('gallery') }}">Go to Gallery</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">Login</a> | <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="gallery-container">
+        <!-- Logout Link -->
+        <div class="logout-link">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        <h1>Welcome to Your Gallery, {{ current_user.username }}!</h1>
+
+        <!-- Upload Form -->
+        <div class="upload-form">
+            <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.gif,.tiff" required>
+                </div>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+
+        <!-- Display Uploaded Images -->
+        <h2>Your Images:</h2>
+        <div class="gallery">
+            {% for image in images %}
+                <div class="gallery-item">
+                    <img src="{{ url_for('image', filename=image) }}" alt="{{ image }}" onclick="openModal('{{ url_for('image', filename=image) }}')">
+                    <form method="POST" action="{{ url_for('delete', filename=image) }}" class="delete-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="modal-image-container">
+            <img class="modal-content" id="modalImage">
+        </div>
+        <button class="nav-button prev" onclick="prevImage()">&#10094;</button>
+        <button class="nav-button next" onclick="nextImage()">&#10095;</button>
+    </div>
+
+    <script>
+        // JavaScript for Modal, Navigation, and Zoom
+        let currentIndex = 0;
+        const images = Array.from(document.querySelectorAll('.gallery img'));
+        const modal = document.getElementById('myModal');
+        const modalImg = document.getElementById('modalImage');
+        let scale = 1; // Initial scale for zoom
+
+        function openModal(src) {
+            modal.style.display = 'block';
+            modalImg.src = src;
+            currentIndex = images.findIndex(img => img.src === src);
+            scale = 1; // Reset scale when opening a new image
+            modalImg.style.transform = `scale(${scale})`;
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            scale = 1; // Reset scale when closing the modal
+            modalImg.style.transform = `scale(${scale})`;
+        }
+
+        function prevImage() {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            modalImg.src = images[currentIndex].src;
+            scale = 1; // Reset scale when navigating to a new image
+            modalImg.style.transform = `scale(${scale})`;
+        }
+
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % images.length;
+            modalImg.src = images[currentIndex].src;
+            scale = 1; // Reset scale when navigating to a new image
+            modalImg.style.transform = `scale(${scale})`;
+        }
+
+        // Zoom in/out with mouse scroll
+        modalImg.addEventListener('wheel', (e) => {
+            e.preventDefault(); // Prevent page scroll
+            if (e.deltaY < 0) {
+                // Zoom in
+                scale += 0.1;
+            } else {
+                // Zoom out
+                scale -= 0.1;
+            }
+            // Limit the scale to avoid too small or too large images
+            scale = Math.min(Math.max(0.5, scale), 3); // Min scale: 0.5, Max scale: 3
+            modalImg.style.transform = `scale(${scale})`;
+        });
+
+        // Close modal when clicking outside the image
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+			
+    </script>
+	<script>
+        // Automatically hide flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashMessages = document.querySelectorAll('.flash');
+            flashMessages.forEach(flash => {
+                setTimeout(() => {
+                    flash.style.opacity = '0'; // Start fade-out
+                    setTimeout(() => flash.remove(), 500); // Remove after fade-out
+                }, 5000); // 5 seconds delay
+            });
+        });
+    </script>
+</body>
+</html>

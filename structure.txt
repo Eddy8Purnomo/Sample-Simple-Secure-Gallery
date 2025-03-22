@@ -1,0 +1,11 @@
+gallery-app/
+├── app.py                  # Main application file
+├── requirements.txt        # List of dependencies
+├── README.md               # Project documentation
+├── uploads/                # Directory for storing uploaded images
+├── static/                 # Static files (CSS, JavaScript)
+│   └── style.css           # Stylesheet for the app
+└── templates/              # HTML templates
+    ├── gallery.html        # Gallery page
+    ├── login.html          # Login page
+    └── register.html       # Registration page
